@@ -134,13 +134,13 @@ int main(int argc, char** argv) {
             sprintf(argv[4], "%d", numThreads);
             argv[5] = "-b";
             argv[6] = malloc(1000);
-            sprintf(argv[4], "%d", socketBufferSize);
+            sprintf(argv[6], "%d", socketBufferSize);
             argv[7] = "-c";
             argv[8] = malloc(1000);
-            sprintf(argv[4], "%d", cyclicBufferSize);
+            sprintf(argv[8], "%d", cyclicBufferSize);
             argv[9] = "-s";
             argv[10] = malloc(1000);
-            sprintf(argv[4], "%d", bloomSize);
+            sprintf(argv[10], "%d", bloomSize);
             //for paths
             argv[11] = NULL;
 
