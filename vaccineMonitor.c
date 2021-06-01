@@ -33,7 +33,7 @@ int main_vaccine(int argc, char** argv) {
 
     /*  ---     DECLARATIONS    --- */
 
-    int bloomSize = -1, bufferSize = -1, numMonitors = -1, j, port;
+    int bloomSize = -1, bufferSize = -1, numMonitors = -1, cyclicBufferSize = -1, j, port;
     int fd;
     char* token;
     char* inputDirectoryPath = NULL;
@@ -52,7 +52,7 @@ int main_vaccine(int argc, char** argv) {
 
     srand(time(0));
 
-    read_arguments_for_vaccine_monitor(argc, argv, &bloomSize, &bufferSize, &numMonitors, &port);
+    read_arguments_for_vaccine_monitor(argc, argv, &bloomSize, &bufferSize, &numMonitors, &port, &cyclicBufferSize);
 
     act.sa_handler = catchinterrupt2;
     sigfillset(&(act.sa_mask));

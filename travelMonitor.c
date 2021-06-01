@@ -123,14 +123,26 @@ int main(int argc, char** argv) {
 
             send_info(node->fd, info3, info_length3, info_length3);
         } else if (pid == 0) { //child
-            argc = 3;
+            argc = 11;
             argv = malloc(sizeof (char*)*4);
             argv[0] = "vaccineMonitor";
             argv[1] = "-p";
             argv[2] = malloc(1000);
-            argv[3] = NULL;
-            
             sprintf(argv[2], "%d", port);
+            argv[3] = "-t";
+            argv[4] = malloc(1000);
+            sprintf(argv[4], "%d", numThreads);
+            argv[5] = "-b";
+            argv[6] = malloc(1000);
+            sprintf(argv[4], "%d", socketBufferSize);
+            argv[7] = "-c";
+            argv[8] = malloc(1000);
+            sprintf(argv[4], "%d", cyclicBufferSize);
+            argv[9] = "-s";
+            argv[10] = malloc(1000);
+            sprintf(argv[4], "%d", bloomSize);
+            //for paths
+            argv[11] = NULL;
 
             //			execvp("./vaccineMonitor", argv);
 

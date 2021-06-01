@@ -40,7 +40,7 @@ DIR* read_arguments_for_travel_monitor(int argc, char** argv, int* bloomSize, in
     DIR* inputDirectory;
 
     if (argc != 13) {
-        printf("Wrong arguments!!!\n");
+        printf("Wrong arguments from father!!!\n");
         return NULL;
     } else {
         for (i = 0; i < 13; i++) {
@@ -67,15 +67,23 @@ DIR* read_arguments_for_travel_monitor(int argc, char** argv, int* bloomSize, in
     return inputDirectory;
 }
 
-void read_arguments_for_vaccine_monitor(int argc, char** argv, int* bloomSize, int *bufferSize, int *numMonitors, int * port) {
+void read_arguments_for_vaccine_monitor(int argc, char** argv, int* bloomSize, int *bufferSize, int *numMonitors, int* port, int* cyclicBufferSize) {
     int i;
 
-    if (argc != 3) {
-        printf("Wrong arguments!!!\n");
+    if (argc != 11) {
+        printf("Wrong arguments from child!!!\n");
     } else {
         for (i = 0; i < argc; i++) {
             if (!strcmp(argv[i], "-p")) {
                 *port = atoi(argv[i + 1]);
+            } else if (!strcmp(argv[i], "-t")) {
+                *numMonitors = atoi(argv[i + 1]);
+            } else if (!strcmp(argv[i], "-b")) {
+                *bufferSize = atoi(argv[i + 1]);
+            } else if (!strcmp(argv[i], "-c")) {
+                *cyclicBufferSize = atoi(argv[i + 1]);
+            } else if (!strcmp(argv[i], "-s")) {
+                *bloomSize = atoi(argv[i + 1]);
             }
         }
     }
