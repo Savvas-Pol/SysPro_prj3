@@ -40,7 +40,7 @@ DIR* read_arguments_for_travel_monitor(int argc, char** argv, int* bloomSize, in
     DIR* inputDirectory;
 
     if (argc != 13) {
-        printf("Wrong arguments from father!!!\n");
+        printf("Wrong arguments!!!\n");
         return NULL;
     } else {
         for (i = 0; i < 13; i++) {

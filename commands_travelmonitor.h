@@ -13,4 +13,5 @@ void travel_stats_country(HashtableVirus* ht_viruses, HashtableCountry* ht_count
 void add_vaccination_records(HashtableVirus* ht_viruses, HashtableCountry* ht_countries, HashtableMonitor* ht_monitors, int bloomSize, int bufferSize,  char* country);
 void search_vaccination_status(HashtableVirus* ht_viruses, HashtableCountry* ht_countries, HashtableMonitor* ht_monitors, int bloomSize, int bufferSize, int numMonitors, char* citizenID);
 void exit_travelmonitor(HashtableMonitor* ht_monitors, int numMonitors, int bufferSize);
+
 #endif

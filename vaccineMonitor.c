@@ -8,7 +8,8 @@
 #include <dirent.h>
 #include <sys/socket.h>      /* sockets */
 #include <netinet/in.h>      /* internet sockets */
-#include <netdb.h>          /* gethostbyaddr */
+#include <netdb.h>
+#include <pthread.h>          /* gethostbyaddr */
 
 #include "help_functions.h"
 #include "hashtable_virus.h"
@@ -19,6 +20,8 @@
 #include "record.h"
 #include "commands_vaccinemonitor.h"
 #include "constants.h"
+#include "thread_queue.h"
+#include "ThreadPool.h"
 
 int writelog = 0;
 
@@ -33,13 +36,12 @@ int main_vaccine(int argc, char** argv) {
 
     /*  ---     DECLARATIONS    --- */
 
-    int bloomSize = -1, bufferSize = -1, numMonitors = -1, cyclicBufferSize = -1, j, port;
+    int bloomSize = -1, bufferSize = -1, numThreads = -1, cyclicBufferSize = -1, j, port;
     int fd;
     char* token;
     char* inputDirectoryPath = NULL;
 
     char* line = NULL;
-    size_t len = 0;
 
     DIR* inputDirectory = NULL;
     struct dirent *direntp;
@@ -52,7 +54,7 @@ int main_vaccine(int argc, char** argv) {
 
     srand(time(0));
 
-    read_arguments_for_vaccine_monitor(argc, argv, &bloomSize, &bufferSize, &numMonitors, &port, &cyclicBufferSize);
+    read_arguments_for_vaccine_monitor(argc, argv, &bloomSize, &bufferSize, &numThreads, &port, &cyclicBufferSize);
 
     act.sa_handler = catchinterrupt2;
     sigfillset(&(act.sa_mask));
@@ -87,8 +89,6 @@ int main_vaccine(int argc, char** argv) {
 
     //printf("Child: <%d>: waiting for bloom size and buffer size ... \n", id);
 
-    bloomSize = receive_int(fd, sizeof (int));
-    bufferSize = receive_int(fd, sizeof (int));
     receive_info(fd, &inputDirectoryPath, bufferSize);
 
     //printf("Child: <%d>: waiting for countries (bloom:%d, buffer:%d, dir:%s )... \n", id, bloomSize, bufferSize, inputDirectoryPath);
@@ -97,6 +97,26 @@ int main_vaccine(int argc, char** argv) {
     HashtableCitizen* ht_citizens = hash_citizen_create(HASHTABLE_NODES); //create HashTable for citizens
     HashtableCountry* ht_countries = hash_country_create(HASHTABLE_NODES); //create HashTable for countries
     HashtableFilenames* ht_filenames = hash_filenames_create(HASHTABLE_NODES); //create HashTable for filenames
+    ThreadQueue * tq = thread_queue_create(cyclicBufferSize);
+
+    ThreadPoolArgp targp;
+    targp.bloomSize = bloomSize;
+    targp.bufferSize = bufferSize;
+    targp.numThreads = numThreads;
+    targp.cyclicBufferSize = cyclicBufferSize;
+    targp.ht_viruses = ht_viruses;
+    targp.ht_citizens = ht_citizens;
+    targp.ht_countries = ht_countries;
+    targp.ht_filenames = ht_filenames;
+    targp.tq = tq;
+
+    void * argp = (void*) &targp;
+    ThreadPool * tp = thread_pool_create(numThreads, argp);
+
+
+
+
+    int countries_to_be_processed = 0;
 
     while (1) {
         char* info3 = NULL;
@@ -133,30 +153,24 @@ int main_vaccine(int argc, char** argv) {
                     strcat(buffer5, "/");
                     strcat(buffer5, direntp->d_name);
 
-                    FILE* citizenRecordsFile = fopen(buffer5, "r");
+                    thread_queue_insert(tq, buffer5);
 
-                    if (citizenRecordsFile != NULL) {
-                        int r;
-
-                        hash_filenames_insert(ht_filenames, buffer5);
-
-                        while ((r = getline(&line, &len, citizenRecordsFile)) != -1) { //read file line by line
-                            Record record;
-
-                            fill_record(line, &record); //create a temp record
-                            insert_citizen_record(ht_viruses, ht_citizens, ht_countries, bloomSize, record, 1); //flag=1 means from file
-                            free_record(&record); //free temp record
-                        }
-
-                        fclose(citizenRecordsFile);
-                        free(buffer5);
-                    }
+                    countries_to_be_processed++;
                 }
             }
         }
 
         free(buffer4);
     }
+
+
+    pthread_mutex_lock(&tq->mtx);
+    while (tq->items_processed < countries_to_be_processed) {
+        pthread_cond_wait(&tq->cond_nonfull, &tq->mtx);
+    }
+    tq->items_processed = 0;
+    pthread_mutex_unlock(&tq->mtx);
+
 
     int tablelen;
     HashtableVirusNode** table = hash_virus_to_array(ht_viruses, &tablelen);
@@ -437,10 +451,12 @@ int main_vaccine(int argc, char** argv) {
         free(line);
     }
 
+    thread_pool_destroy(tp, tq);
     hash_virus_destroy(ht_viruses);
     hash_citizen_destroy(ht_citizens);
     hash_country_destroy(ht_countries);
     hash_filenames_destroy(ht_filenames);
+    thread_queue_destroy(tq);
 
     printf("Child: <%d>: Exiting ... \n", port);
 

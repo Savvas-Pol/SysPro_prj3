@@ -10,9 +10,9 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include <sys/socket.h>	     /* sockets */
-#include <netinet/in.h>	     /* internet sockets */
-#include <netdb.h>	         /* gethostbyaddr */
+#include <sys/socket.h>      /* sockets */
+#include <netinet/in.h>      /* internet sockets */
+#include <netdb.h>          /* gethostbyaddr */
 #include "help_functions.h"
 #include "hashtable_virus.h"
 #include "hashtable_citizen.h"
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
 
         if (pid > 0) { //parent
             struct sockaddr_in client;
-            socklen_t clientlen = sizeof(client);
+            socklen_t clientlen = sizeof (client);
 
             node->pid = pid;
 
@@ -108,23 +108,13 @@ int main(int argc, char** argv) {
                 exit(j);
             }
 
-            char* info1 = (char*) &bloomSize;
-            int info_length1 = sizeof (bloomSize);
-
-            send_info(node->fd, info1, info_length1, info_length1); //first message is bloomSize
-
-            char* info2 = (char*) &socketBufferSize;
-            int info_length2 = sizeof (socketBufferSize);
-
-            send_info(node->fd, info2, info_length2, info_length2); //second message is bufferSize
-
             char* info3 = inputDirectoryPath;
             int info_length3 = strlen(inputDirectoryPath) + 1;
 
             send_info(node->fd, info3, info_length3, info_length3);
         } else if (pid == 0) { //child
             argc = 11;
-            argv = malloc(sizeof (char*)*4);
+            argv = malloc(sizeof (char*)*12);
             argv[0] = "vaccineMonitor";
             argv[1] = "-p";
             argv[2] = malloc(1000);
@@ -291,7 +281,7 @@ int main(int argc, char** argv) {
 
     free(table);
     free(vtable);
-    
+
     close(welcoming_fd);
 
     return 0;

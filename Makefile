@@ -1,7 +1,7 @@
 all: travelMonitor
 
-travelMonitor: travelMonitor.o vaccineMonitor.o help_functions.o skiplist.o hashtable_virus.o hashtable_citizen.o hashtable_country.o hashtable_monitor.o hashtable_filenames.o BF.o date.o commands_vaccinemonitor.o commands_travelmonitor.o citizen.o
-	gcc travelMonitor.o vaccineMonitor.o help_functions.o skiplist.o hashtable_virus.o hashtable_citizen.o hashtable_country.o hashtable_monitor.o hashtable_filenames.o BF.o date.o commands_vaccinemonitor.o citizen.o commands_travelmonitor.o -o travelMonitor
+travelMonitor: travelMonitor.o vaccineMonitor.o help_functions.o skiplist.o hashtable_virus.o hashtable_citizen.o hashtable_country.o hashtable_monitor.o hashtable_filenames.o BF.o date.o commands_vaccinemonitor.o commands_travelmonitor.o citizen.o thread_queue.o ThreadPool.o
+	gcc travelMonitor.o vaccineMonitor.o help_functions.o skiplist.o hashtable_virus.o hashtable_citizen.o hashtable_country.o hashtable_monitor.o hashtable_filenames.o BF.o date.o commands_vaccinemonitor.o citizen.o commands_travelmonitor.o thread_queue.o ThreadPool.o -pthread -o travelMonitor
 
 travelMonitor.o: travelMonitor.c
 	gcc -c travelMonitor.c
@@ -44,6 +44,12 @@ commands_travelmonitor.o: commands_travelmonitor.c
 	
 citizen.o: citizen.c
 	gcc -c citizen.c
-	
+
+thread_queue.o: thread_queue.c
+	gcc -c thread_queue.c
+
+ThreadPool.o: ThreadPool.c
+	gcc -c ThreadPool.c
+
 clean:
-	rm -f travelMonitor travelMonitor.o vaccineMonitor.o help_functions.o skiplist.o hashtable_virus.o hashtable_citizen.o hashtable_country.o hashtable_monitor.o hashtable_filenames.o BF.o date.o commands_vaccinemonitor.o commands_travelmonitor.o citizen.o
+	rm -f travelMonitor travelMonitor.o vaccineMonitor.o help_functions.o skiplist.o hashtable_virus.o hashtable_citizen.o hashtable_country.o hashtable_monitor.o hashtable_filenames.o BF.o date.o commands_vaccinemonitor.o commands_travelmonitor.o citizen.o thread_queue.o ThreadPool.o
