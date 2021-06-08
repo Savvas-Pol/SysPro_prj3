@@ -190,7 +190,16 @@ void add_vaccination_records(HashtableVirus* ht_viruses, HashtableCountry* ht_co
 
     //printf("Node for %s is %s \n", country->countryName, node->monitorName);
 
-    kill(node->pid, SIGUSR1);
+    //kill(node->pid, SIGUSR1);
+    char* command = malloc(strlen("addVaccinationRecords") + strlen(countryName) + 2);
+    sprintf(command, "addVaccinationRecords %s", countryName); //reconstruct command
+
+    //printf("Sending command :%s to worker %d through pipe: %s via fd: %d \n", command, country->who, node->from_parent_to_child, node->fd_from_parent_to_child);
+
+    char* info = command;
+    int info_length = strlen(command) + 1;
+
+    send_info(node->fd, info, info_length, bufferSize);
 
     int fd = node->fd;
 

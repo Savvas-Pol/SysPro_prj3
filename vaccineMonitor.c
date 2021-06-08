@@ -250,7 +250,13 @@ int main_vaccine(int argc, char** argv) {
                 tokens[0] = strtok(NULL, " \n"); //citizenID
 
                 search_vaccination_status_for_child(ht_viruses, ht_countries, ht_citizens, bloomSize, bufferSize, fd, fd, tokens[0]);
-            } else if (!strcmp(token, "/vaccineStatusBloom")) {
+            } else if (!strcmp(token, "addVaccinationRecords")) {
+                char* tokens[1];
+
+                tokens[0] = strtok(NULL, " \n"); //countryName
+
+                //add_vaccination_records_for_child(ht_viruses, ht_countries, ht_citizens, bloomSize, bufferSize, fd, fd, tokens[0]);
+            }else if (!strcmp(token, "/vaccineStatusBloom")) {
                 char* tokens[3];
 
                 tokens[0] = strtok(NULL, " \n"); //citizenID

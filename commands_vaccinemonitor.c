@@ -720,7 +720,6 @@ void add_vaccination_records_for_child(char* inputDirectoryPath, HashtableFilena
 
 	HashtableVirusNode** table = hash_virus_to_array(ht_viruses, &tablelen2);
 
-
 	for (j = 0; j < tablelen2; j++) {
 		char* virus = table[j]->virusName;
 		char* info1 = (char*) virus;
