@@ -255,7 +255,7 @@ int main_vaccine(int argc, char** argv) {
 
                 tokens[0] = strtok(NULL, " \n"); //countryName
 
-                //add_vaccination_records_for_child(ht_viruses, ht_countries, ht_citizens, bloomSize, bufferSize, fd, fd, tokens[0]);
+                //add_vaccination_records_for_child(inputDirectoryPath, ht_filenames, ht_citizens, ht_countries, ht_viruses, table, tablelen, bloomSize, from_child_to_parent, bufferSize, readfd, writefd);
             }else if (!strcmp(token, "/vaccineStatusBloom")) {
                 char* tokens[3];
 
