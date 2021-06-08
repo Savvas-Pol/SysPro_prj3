@@ -87,8 +87,18 @@ int main(int argc, char** argv) {
     }
 
     int welcoming_fd = create_welcoming_socket(ht_monitors, numMonitors, port);
-
-
+    int tablelen;
+    HashtableCountryNode** table = hash_country_to_array(ht_countries, &tablelen); //convert hash table to array to sort countries
+    
+    for(i=0;i<tablelen;i++) {                           //add paths to countries
+        char* tempvalue = strdup(inputDirectoryPath);
+        strcat(tempvalue, "/");
+        strcat(tempvalue, table[i]->countryName);
+        strcpy(table[i]->countryName, tempvalue);
+        free(tempvalue);
+        //printf("%d. Country: %s\n",i+1,table[i]->countryName);
+    }
+    
     for (j = 0; j < numMonitors; j++) {
         char name[100];
         sprintf(name, "%d", j);
@@ -113,7 +123,7 @@ int main(int argc, char** argv) {
 
             send_info(node->fd, info3, info_length3, info_length3);
         } else if (pid == 0) { //child
-            argc = 11;
+            argc = 10;
             argv = malloc(sizeof (char*)*12);
             argv[0] = "vaccineMonitor";
             argv[1] = "-p";
@@ -131,10 +141,28 @@ int main(int argc, char** argv) {
             argv[9] = "-s";
             argv[10] = malloc(1000);
             sprintf(argv[10], "%d", bloomSize);
-            //for paths
-            argv[11] = NULL;
+            for(i = j; i < tablelen; i += numMonitors) {
+                argc++;
+                char** tmp = realloc(argv, sizeof (char*)*(argc+1));
+                if(tmp == NULL) {
+                    printf("tmp==NULL\n");
+                    return -1;
+                }
+                argv = tmp;
+                argv[argc] = malloc(1000);
+                strcpy(argv[argc],table[i]->countryName);
+                //printf("path%d is %s\n",i,argv[argc]);
+            }
+            argc++;
+            argv[argc] = NULL;
 
-            //			execvp("./vaccineMonitor", argv);
+            // printf("argc = %d\n",argc);
+            // for(i=0;i<argc;i++) {
+            //     printf("argv[%d] for child <%d> is %s\n", i, j, argv[i]);
+            // }
+            // printf("-----------------------------------\n");
+
+            //execvp("./vaccineMonitor", argv);
 
             int main_vaccine(int, char **argv);
             main_vaccine(argc, argv);
@@ -143,8 +171,6 @@ int main(int argc, char** argv) {
         }
     }
     //only parent continues from now on
-    int tablelen;
-    HashtableCountryNode** table = hash_country_to_array(ht_countries, &tablelen); //convert hash table to array to sort countries
 
     send_countries_to_monitors(ht_monitors, table, tablelen, numMonitors, socketBufferSize); //send countries round robin to monitors
     send_finishing_character(ht_monitors, numMonitors, socketBufferSize); //send finishing character "#" to all monitors

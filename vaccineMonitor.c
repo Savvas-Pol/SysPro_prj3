@@ -36,7 +36,7 @@ int main_vaccine(int argc, char** argv) {
 
     /*  ---     DECLARATIONS    --- */
 
-    int bloomSize = -1, bufferSize = -1, numThreads = -1, cyclicBufferSize = -1, j, port;
+    int i, bloomSize = -1, bufferSize = -1, numThreads = -1, cyclicBufferSize = -1, j, port;
     int fd;
     char* token;
     char* inputDirectoryPath = NULL;
@@ -54,8 +54,10 @@ int main_vaccine(int argc, char** argv) {
 
     srand(time(0));
 
-    read_arguments_for_vaccine_monitor(argc, argv, &bloomSize, &bufferSize, &numThreads, &port, &cyclicBufferSize);
-
+    char** countries = read_arguments_for_vaccine_monitor(argc, argv, &bloomSize, &bufferSize, &numThreads, &port, &cyclicBufferSize);
+    // for(i = 0; i < argc-11; i++) {
+    //     printf("Country %d: %s\n",i, countries[i]);
+    // }
     act.sa_handler = catchinterrupt2;
     sigfillset(&(act.sa_mask));
 
@@ -113,9 +115,6 @@ int main_vaccine(int argc, char** argv) {
     void * argp = (void*) &targp;
     ThreadPool * tp = thread_pool_create(numThreads, argp);
 
-
-
-
     int countries_to_be_processed = 0;
 
     while (1) {
@@ -128,8 +127,10 @@ int main_vaccine(int argc, char** argv) {
             break;
         }
 
-        //printf("Child: <%d>: country received: %s ... \n", id, buffer);
-
+        buffer=strtok(buffer, "/");     //remove path from received country
+        buffer=strtok(NULL, "/");
+        //printf("Child: country received: %s ... \n", buffer);
+        
         HashtableCountryNode* country = hash_country_search(ht_countries, buffer);
         if (country == NULL) {
             hash_country_insert(ht_countries, buffer);

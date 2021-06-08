@@ -67,26 +67,39 @@ DIR* read_arguments_for_travel_monitor(int argc, char** argv, int* bloomSize, in
     return inputDirectory;
 }
 
-void read_arguments_for_vaccine_monitor(int argc, char** argv, int* bloomSize, int *bufferSize, int *numMonitors, int* port, int* cyclicBufferSize) {
-    int i;
+char** read_arguments_for_vaccine_monitor(int argc, char** argv, int* bloomSize, int *bufferSize, int *numThreads, int* port, int* cyclicBufferSize) {
+    int i, j = 0;
+    char** monitorCountries = malloc(sizeof(char*)*(argc-11));
 
-    if (argc != 11) {
-        printf("Wrong arguments from child!!!\n");
-    } else {
-        for (i = 0; i < argc; i++) {
-            if (!strcmp(argv[i], "-p")) {
-                *port = atoi(argv[i + 1]);
-            } else if (!strcmp(argv[i], "-t")) {
-                *numMonitors = atoi(argv[i + 1]);
-            } else if (!strcmp(argv[i], "-b")) {
-                *bufferSize = atoi(argv[i + 1]);
-            } else if (!strcmp(argv[i], "-c")) {
-                *cyclicBufferSize = atoi(argv[i + 1]);
-            } else if (!strcmp(argv[i], "-s")) {
-                *bloomSize = atoi(argv[i + 1]);
+    for (i = 0; i < argc; i++) {
+        if (!strcmp(argv[i], "-p")) {
+            *port = atoi(argv[i + 1]);
+            i++;
+        } else if (!strcmp(argv[i], "-t")) {
+            *numThreads = atoi(argv[i + 1]);
+            i++;
+        } else if (!strcmp(argv[i], "-b")) {
+            *bufferSize = atoi(argv[i + 1]);
+            i++;
+        } else if (!strcmp(argv[i], "-c")) {
+            *cyclicBufferSize = atoi(argv[i + 1]);
+            i++;
+        } else if (!strcmp(argv[i], "-s")) {
+            *bloomSize = atoi(argv[i + 1]);
+            i++;
+        } else {
+            //paths
+            if(strcmp(argv[i], "vaccineMonitor") != 0) {
+                argv[i]=strtok(argv[i], "/");     //remove path from received country
+                argv[i]=strtok(NULL, "/");
+                monitorCountries[j] = malloc(strlen(argv[i]));
+                strcpy(monitorCountries[j],argv[i]);
+                j++;
             }
         }
     }
+    
+    return monitorCountries;
 }
 
 void fill_record(char* line, Record* temp) { //breaks line into tokens and creates a new record
