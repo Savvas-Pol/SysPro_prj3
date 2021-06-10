@@ -88,14 +88,16 @@ int main(int argc, char** argv) {
 
     int welcoming_fd = create_welcoming_socket(ht_monitors, numMonitors, port);
     int tablelen;
-    HashtableCountryNode** table = hash_country_to_array(ht_countries, &tablelen); //convert hash table to array to sort countries
+    HashtableCountryNode** nodetable = hash_country_to_array(ht_countries, &tablelen); //convert hash table to array to sort countries
+    char ** table = malloc(sizeof(char*)*tablelen);
     
     for(i=0;i<tablelen;i++) {                           //add paths to countries
-        char* tempvalue = strdup(inputDirectoryPath);
+        char* tempvalue = malloc(PATH_MAX);
+        strcpy(tempvalue, inputDirectoryPath);
         strcat(tempvalue, "/");
-        strcat(tempvalue, table[i]->countryName);
-        strcpy(table[i]->countryName, tempvalue);
-        free(tempvalue);
+        strcat(tempvalue, nodetable[i]->countryName);
+        
+        table[i] = tempvalue;
         //printf("%d. Country: %s\n",i+1,table[i]->countryName);
     }
     
@@ -118,42 +120,44 @@ int main(int argc, char** argv) {
                 exit(j);
             }
 
-            char* info3 = inputDirectoryPath;
-            int info_length3 = strlen(inputDirectoryPath) + 1;
-
-            send_info(node->fd, info3, info_length3, info_length3);
+//            char* info3 = inputDirectoryPath;
+//            int info_length3 = strlen(inputDirectoryPath) + 1;
+//
+//            send_info(node->fd, info3, info_length3, info_length3);
         } else if (pid == 0) { //child
-            argc = 10;
+            argc = 11;
             argv = malloc(sizeof (char*)*12);
             argv[0] = "vaccineMonitor";
             argv[1] = "-p";
-            argv[2] = malloc(1000);
+            argv[2] = malloc(11);
             sprintf(argv[2], "%d", port);
             argv[3] = "-t";
-            argv[4] = malloc(1000);
+            argv[4] = malloc(11);
             sprintf(argv[4], "%d", numThreads);
             argv[5] = "-b";
-            argv[6] = malloc(1000);
+            argv[6] = malloc(11);
             sprintf(argv[6], "%d", socketBufferSize);
             argv[7] = "-c";
-            argv[8] = malloc(1000);
+            argv[8] = malloc(11);
             sprintf(argv[8], "%d", cyclicBufferSize);
             argv[9] = "-s";
-            argv[10] = malloc(1000);
+            argv[10] = malloc(11);
             sprintf(argv[10], "%d", bloomSize);
+            
             for(i = j; i < tablelen; i += numMonitors) {
-                argc++;
-                char** tmp = realloc(argv, sizeof (char*)*(argc+1));
+                char** tmp = realloc(argv, sizeof (char*)*(argc+2));
                 if(tmp == NULL) {
                     printf("tmp==NULL\n");
                     return -1;
                 }
                 argv = tmp;
-                argv[argc] = malloc(1000);
-                strcpy(argv[argc],table[i]->countryName);
+                argv[argc] = malloc(PATH_MAX);
+                strcpy(argv[argc], table[i]);
+                
+                argc++;
+                
                 //printf("path%d is %s\n",i,argv[argc]);
             }
-            argc++;
             argv[argc] = NULL;
 
             // printf("argc = %d\n",argc);
@@ -172,8 +176,8 @@ int main(int argc, char** argv) {
     }
     //only parent continues from now on
 
-    send_countries_to_monitors(ht_monitors, table, tablelen, numMonitors, socketBufferSize); //send countries round robin to monitors
-    send_finishing_character(ht_monitors, numMonitors, socketBufferSize); //send finishing character "#" to all monitors
+    send_countries_to_monitors(ht_monitors, nodetable, tablelen, numMonitors, socketBufferSize); //send countries round robin to monitors
+//    send_finishing_character(ht_monitors, numMonitors, socketBufferSize); //send finishing character "#" to all monitors
     receive_bloom_filter(ht_monitors, ht_viruses, numMonitors, bloomSize, socketBufferSize);
 
     int vtablelen;
@@ -305,7 +309,7 @@ int main(int argc, char** argv) {
     hash_country_destroy(ht_countries);
     hash_monitor_destroy(ht_monitors);
 
-    free(table);
+    free(nodetable);
     free(vtable);
 
     close(welcoming_fd);

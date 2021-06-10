@@ -39,7 +39,6 @@ int main_vaccine(int argc, char** argv) {
     int i, bloomSize = -1, bufferSize = -1, numThreads = -1, cyclicBufferSize = -1, j, port;
     int fd;
     char* token;
-    char* inputDirectoryPath = NULL;
 
     char* line = NULL;
 
@@ -54,7 +53,11 @@ int main_vaccine(int argc, char** argv) {
 
     srand(time(0));
 
-    char** countries = read_arguments_for_vaccine_monitor(argc, argv, &bloomSize, &bufferSize, &numThreads, &port, &cyclicBufferSize);
+    int total_countries = argc - 11;
+    char*** out = read_arguments_for_vaccine_monitor(argc, argv, &bloomSize, &bufferSize, &numThreads, &port, &cyclicBufferSize);
+    char ** countries = out[0];
+    char ** countryPaths = out[1];
+
     // for(i = 0; i < argc-11; i++) {
     //     printf("Country %d: %s\n",i, countries[i]);
     // }
@@ -91,7 +94,7 @@ int main_vaccine(int argc, char** argv) {
 
     //printf("Child: <%d>: waiting for bloom size and buffer size ... \n", id);
 
-    receive_info(fd, &inputDirectoryPath, bufferSize);
+    //    receive_info(fd, &inputDirectoryPath, bufferSize);
 
     //printf("Child: <%d>: waiting for countries (bloom:%d, buffer:%d, dir:%s )... \n", id, bloomSize, bufferSize, inputDirectoryPath);
 
@@ -115,31 +118,14 @@ int main_vaccine(int argc, char** argv) {
     void * argp = (void*) &targp;
     ThreadPool * tp = thread_pool_create(numThreads, argp);
 
-    int countries_to_be_processed = 0;
+    int files_to_be_processed = 0;
 
-    while (1) {
-        char* info3 = NULL;
-        receive_info(fd, &info3, bufferSize);
+    for (i = 0; i < total_countries; i++) {
+        char * buffer = countries[i];
 
-        char* buffer = info3;
+        hash_country_insert(ht_countries, buffer);
 
-        if (buffer[0] == '#') {
-            break;
-        }
-
-        buffer=strtok(buffer, "/");     //remove path from received country
-        buffer=strtok(NULL, "/");
-        //printf("Child: country received: %s ... \n", buffer);
-        
-        HashtableCountryNode* country = hash_country_search(ht_countries, buffer);
-        if (country == NULL) {
-            hash_country_insert(ht_countries, buffer);
-        }
-
-        char* buffer4 = malloc(strlen(inputDirectoryPath) + 1 + strlen(buffer) + 1);
-        strcpy(buffer4, inputDirectoryPath);
-        strcat(buffer4, "/");
-        strcat(buffer4, buffer);
+        char* buffer4 = countryPaths[i];
 
         if (!(inputDirectory = opendir(buffer4))) {
             printf("Error in opening %s\n", buffer4);
@@ -147,16 +133,14 @@ int main_vaccine(int argc, char** argv) {
             while ((direntp = readdir(inputDirectory)) != NULL) {
                 if (direntp->d_name[0] != '.') {
 
-                    char* buffer5 = malloc(strlen(inputDirectoryPath) + 1 + strlen(buffer) + 1 + strlen(direntp->d_name) + 1);
-                    strcpy(buffer5, inputDirectoryPath);
-                    strcat(buffer5, "/");
-                    strcat(buffer5, buffer);
+                    char* buffer5 = malloc(strlen(buffer4) + 1 + strlen(direntp->d_name) + 1);
+                    strcpy(buffer5, buffer4);
                     strcat(buffer5, "/");
                     strcat(buffer5, direntp->d_name);
 
                     thread_queue_insert(tq, buffer5);
 
-                    countries_to_be_processed++;
+                    files_to_be_processed++;
                 }
             }
         }
@@ -166,7 +150,7 @@ int main_vaccine(int argc, char** argv) {
 
 
     pthread_mutex_lock(&tq->mtx);
-    while (tq->items_processed < countries_to_be_processed) {
+    while (tq->items_processed < files_to_be_processed) {
         pthread_cond_wait(&tq->cond_nonfull, &tq->mtx);
     }
     tq->items_processed = 0;
@@ -256,7 +240,7 @@ int main_vaccine(int argc, char** argv) {
                 tokens[0] = strtok(NULL, " \n"); //countryName
 
                 //add_vaccination_records_for_child(inputDirectoryPath, ht_filenames, ht_citizens, ht_countries, ht_viruses, table, tablelen, bloomSize, from_child_to_parent, bufferSize, readfd, writefd);
-            }else if (!strcmp(token, "/vaccineStatusBloom")) {
+            } else if (!strcmp(token, "/vaccineStatusBloom")) {
                 char* tokens[3];
 
                 tokens[0] = strtok(NULL, " \n"); //citizenID

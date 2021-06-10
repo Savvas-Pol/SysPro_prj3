@@ -67,10 +67,17 @@ DIR* read_arguments_for_travel_monitor(int argc, char** argv, int* bloomSize, in
     return inputDirectory;
 }
 
-char** read_arguments_for_vaccine_monitor(int argc, char** argv, int* bloomSize, int *bufferSize, int *numThreads, int* port, int* cyclicBufferSize) {
+char*** read_arguments_for_vaccine_monitor(int argc, char** argv, int* bloomSize, int *bufferSize, int *numThreads, int* port, int* cyclicBufferSize) {
     int i, j = 0;
-    char** monitorCountries = malloc(sizeof(char*)*(argc-11));
+    
+    char *** out = malloc(sizeof(char**) * 2);
+    
+    char** monitorCountries = malloc(sizeof (char*)*(argc - 11));
+    char ** monitorPaths = malloc(sizeof (char*)*(argc - 11));
 
+    out[0] = monitorCountries;
+    out[1] = monitorPaths;
+    
     for (i = 0; i < argc; i++) {
         if (!strcmp(argv[i], "-p")) {
             *port = atoi(argv[i + 1]);
@@ -89,24 +96,29 @@ char** read_arguments_for_vaccine_monitor(int argc, char** argv, int* bloomSize,
             i++;
         } else {
             //paths
-            if(strcmp(argv[i], "vaccineMonitor") != 0) {
-                argv[i]=strtok(argv[i], "/");     //remove path from received country
-                argv[i]=strtok(NULL, "/");
-                monitorCountries[j] = malloc(strlen(argv[i]));
-                strcpy(monitorCountries[j],argv[i]);
+            if (strcmp(argv[i], "vaccineMonitor") != 0) {
+                monitorPaths[j] = malloc(strlen(argv[i]) + 1);
+                strcpy(monitorPaths[j], argv[i]);
+                
+                strtok(argv[i], "/"); //remove path from received country
+                argv[i] = strtok(NULL, "/");
+                
+                monitorCountries[j] = malloc(strlen(argv[i]) + 1);
+                strcpy(monitorCountries[j], argv[i]);
                 j++;
             }
         }
     }
-    
-    return monitorCountries;
+
+    return out;
 }
 
 void fill_record(char* line, Record* temp) { //breaks line into tokens and creates a new record
     int i = 0, j;
 
     char* token;
-    token = strtok(line, " \n"); //word by word
+    char * saveptr = NULL;
+    token = strtok_r(line, " \n", &saveptr); //word by word
 
     while (token != NULL) {
         if (i == 0) {
@@ -129,8 +141,10 @@ void fill_record(char* line, Record* temp) { //breaks line into tokens and creat
         } else if (i == 6) {
             if (!strcmp(token, "YES")) {
                 j = 0;
-                token = strtok(NULL, " \n");
-                token = strtok(token, "-\n");
+                token = strtok_r(NULL, " \n", &saveptr);
+                
+                saveptr = NULL;
+                token = strtok_r(token, "-\n", &saveptr);
 
                 temp->dateVaccinated = malloc(sizeof (Date));
 
@@ -141,7 +155,7 @@ void fill_record(char* line, Record* temp) { //breaks line into tokens and creat
                         temp->dateVaccinated->month = atoi(token);
                     else if (j == 2)
                         temp->dateVaccinated->year = atoi(token);
-                    token = strtok(NULL, "-\n");
+                    token = strtok_r(NULL, "-\n", &saveptr);
                     j++;
                 }
 
@@ -150,7 +164,7 @@ void fill_record(char* line, Record* temp) { //breaks line into tokens and creat
             }
         }
 
-        token = strtok(NULL, " \n");
+        token = strtok_r(NULL, " \n", &saveptr);
         i++;
     }
 }
@@ -293,127 +307,127 @@ int receive_int(int fd, int buffersize) {
 }
 
 void respawn_child(HashtableMonitor* ht_monitors, HashtableVirus* ht_viruses, int bloomSize, int bufferSize, char *inputDirectoryPath, int argc, char** argv, HashtableCountryNode** table, int tablelen) {
-//    pid_t p;
-//
-//    while ((p = (waitpid(-1, NULL, WNOHANG))) > 0) {
-//        printf("Child with PID %d died \n", p);
-//
-//        HashtableMonitorNode* node = hash_monitor_search_pid(ht_monitors, p);
-//
-//        close(node->fd_from_child_to_parent);
-//        close(node->fd_from_parent_to_child);
-//
-//        unlink(node->from_child_to_parent);
-//        unlink(node->from_parent_to_child);
-//
-//        if (mkfifo(node->from_child_to_parent, 0600) == -1 && errno == EEXIST) { //create named pipes
-//            unlink(node->from_child_to_parent);
-//            mkfifo(node->from_child_to_parent, 0600);
-//        }
-//
-//        if (mkfifo(node->from_parent_to_child, 0600) == -1 && errno == EEXIST) {
-//            unlink(node->from_parent_to_child);
-//            mkfifo(node->from_parent_to_child, 0600);
-//        }
-//
-//        pid_t newpid = fork();
-//        if (newpid > 0) { //parent
-//            node->pid = newpid; //update pid
-//
-//            if ((node->fd_from_parent_to_child = open(node->from_parent_to_child, O_WRONLY)) < 0) {
-//                perror("travelMonitor: can't open read fifo");
-//                exit(1);
-//            }
-//
-//            if ((node->fd_from_child_to_parent = open(node->from_child_to_parent, O_RDONLY)) < 0) {
-//                perror("travelMonitor: can't open write fifo");
-//                exit(1);
-//            }
-//
-//            char* info1 = (char *) &bloomSize;
-//            int info_length1 = sizeof (bloomSize);
-//
-//            send_info(node->fd_from_parent_to_child, info1, info_length1, info_length1); //first message is bloomSize
-//
-//            char* info2 = (char *) &bufferSize;
-//            int info_length2 = sizeof (bufferSize);
-//
-//            send_info(node->fd_from_parent_to_child, info2, info_length2, info_length2); //second message is bufferSize
-//
-//            char* info3 = inputDirectoryPath;
-//            int info_length3 = strlen(inputDirectoryPath) + 1;
-//
-//            send_info(node->fd_from_parent_to_child, info3, info_length3, info_length3);
-//            // receive_bloom_filter(ht_monitors, ht_viruses, numMonitors, bloomSize, bufferSize);
-//
-//            for (int j = 0; j < tablelen; j++) { //send countries to new child
-//                char * country = table[j]->countryName;
-//
-//                char name[100];
-//                sprintf(name, "%d", table[j]->who);
-//                if (strcmp(name, node->monitorName) == 0) {
-//                    HashtableMonitorNode* node = hash_monitor_search(ht_monitors, name);
-//
-//                    int fd = node->fd_from_parent_to_child;
-//
-//                    printf("Sending country :%s to worker %d through pipe: %s via fd: %d \n", country, table[j]->who, node->from_parent_to_child, fd);
-//
-//                    char * info1 = (char *) country;
-//                    int info_length1 = strlen(country) + 1;
-//
-//                    send_info(fd, info1, info_length1, bufferSize);
-//                }
-//            }
-//            HashtableMonitorNode* node = hash_monitor_search_pid(ht_monitors, newpid);
-//            int fd = node->fd_from_parent_to_child;
-//            char buffer[2] = "#";
-//            strcpy(buffer, "#");
-//            char* info4 = (char*) buffer;
-//            int info_length4 = strlen(buffer) + 1;
-//
-//            send_info(fd, info4, info_length4, bufferSize);
-//
-//            while (1) {
-//                char * info3 = NULL;
-//                receive_info(fd, &info3, bufferSize);
-//
-//                char * buffer = info3;
-//
-//                if (buffer[0] == '#') {
-//                    free(buffer);
-//                    break;
-//                }
-//
-//                char* virusName = info3;
-//
-//                HashtableVirusNode* virusNode = hash_virus_search(ht_viruses, virusName); //search if virus exists
-//                if (virusNode == NULL) {
-//                    virusNode = hash_virus_insert(ht_viruses, virusName);
-//                    virusNode->bloom = bloom_init(bloomSize);
-//                    virusNode->vaccinated_persons = skiplist_init(SKIP_LIST_MAX_LEVEL);
-//                    virusNode->not_vaccinated_persons = skiplist_init(SKIP_LIST_MAX_LEVEL);
-//                }
-//
-//                char* bloomVector = NULL;
-//                receive_info(fd, &bloomVector, bloomSize);
-//
-//                for (int k = 0; k < bloomSize; k++) {
-//                    virusNode->bloom->vector[k] |= bloomVector[k];
-//                }
-//
-//                free(bloomVector);
-//                free(buffer);
-//            }
-//
-//        } else if (newpid == 0) { //child
-//            argc = 3;
-//            argv = malloc(sizeof (char*)*4);
-//            argv[0] = "vaccineMonitor";
-//            argv[1] = "-i";
-//            argv[2] = node->monitorName;
-//            argv[3] = NULL;
-//
-//            execvp("./vaccineMonitor", argv);
-//        }
-//    }
+    //    pid_t p;
+    //
+    //    while ((p = (waitpid(-1, NULL, WNOHANG))) > 0) {
+    //        printf("Child with PID %d died \n", p);
+    //
+    //        HashtableMonitorNode* node = hash_monitor_search_pid(ht_monitors, p);
+    //
+    //        close(node->fd_from_child_to_parent);
+    //        close(node->fd_from_parent_to_child);
+    //
+    //        unlink(node->from_child_to_parent);
+    //        unlink(node->from_parent_to_child);
+    //
+    //        if (mkfifo(node->from_child_to_parent, 0600) == -1 && errno == EEXIST) { //create named pipes
+    //            unlink(node->from_child_to_parent);
+    //            mkfifo(node->from_child_to_parent, 0600);
+    //        }
+    //
+    //        if (mkfifo(node->from_parent_to_child, 0600) == -1 && errno == EEXIST) {
+    //            unlink(node->from_parent_to_child);
+    //            mkfifo(node->from_parent_to_child, 0600);
+    //        }
+    //
+    //        pid_t newpid = fork();
+    //        if (newpid > 0) { //parent
+    //            node->pid = newpid; //update pid
+    //
+    //            if ((node->fd_from_parent_to_child = open(node->from_parent_to_child, O_WRONLY)) < 0) {
+    //                perror("travelMonitor: can't open read fifo");
+    //                exit(1);
+    //            }
+    //
+    //            if ((node->fd_from_child_to_parent = open(node->from_child_to_parent, O_RDONLY)) < 0) {
+    //                perror("travelMonitor: can't open write fifo");
+    //                exit(1);
+    //            }
+    //
+    //            char* info1 = (char *) &bloomSize;
+    //            int info_length1 = sizeof (bloomSize);
+    //
+    //            send_info(node->fd_from_parent_to_child, info1, info_length1, info_length1); //first message is bloomSize
+    //
+    //            char* info2 = (char *) &bufferSize;
+    //            int info_length2 = sizeof (bufferSize);
+    //
+    //            send_info(node->fd_from_parent_to_child, info2, info_length2, info_length2); //second message is bufferSize
+    //
+    //            char* info3 = inputDirectoryPath;
+    //            int info_length3 = strlen(inputDirectoryPath) + 1;
+    //
+    //            send_info(node->fd_from_parent_to_child, info3, info_length3, info_length3);
+    //            // receive_bloom_filter(ht_monitors, ht_viruses, numMonitors, bloomSize, bufferSize);
+    //
+    //            for (int j = 0; j < tablelen; j++) { //send countries to new child
+    //                char * country = table[j]->countryName;
+    //
+    //                char name[100];
+    //                sprintf(name, "%d", table[j]->who);
+    //                if (strcmp(name, node->monitorName) == 0) {
+    //                    HashtableMonitorNode* node = hash_monitor_search(ht_monitors, name);
+    //
+    //                    int fd = node->fd_from_parent_to_child;
+    //
+    //                    printf("Sending country :%s to worker %d through pipe: %s via fd: %d \n", country, table[j]->who, node->from_parent_to_child, fd);
+    //
+    //                    char * info1 = (char *) country;
+    //                    int info_length1 = strlen(country) + 1;
+    //
+    //                    send_info(fd, info1, info_length1, bufferSize);
+    //                }
+    //            }
+    //            HashtableMonitorNode* node = hash_monitor_search_pid(ht_monitors, newpid);
+    //            int fd = node->fd_from_parent_to_child;
+    //            char buffer[2] = "#";
+    //            strcpy(buffer, "#");
+    //            char* info4 = (char*) buffer;
+    //            int info_length4 = strlen(buffer) + 1;
+    //
+    //            send_info(fd, info4, info_length4, bufferSize);
+    //
+    //            while (1) {
+    //                char * info3 = NULL;
+    //                receive_info(fd, &info3, bufferSize);
+    //
+    //                char * buffer = info3;
+    //
+    //                if (buffer[0] == '#') {
+    //                    free(buffer);
+    //                    break;
+    //                }
+    //
+    //                char* virusName = info3;
+    //
+    //                HashtableVirusNode* virusNode = hash_virus_search(ht_viruses, virusName); //search if virus exists
+    //                if (virusNode == NULL) {
+    //                    virusNode = hash_virus_insert(ht_viruses, virusName);
+    //                    virusNode->bloom = bloom_init(bloomSize);
+    //                    virusNode->vaccinated_persons = skiplist_init(SKIP_LIST_MAX_LEVEL);
+    //                    virusNode->not_vaccinated_persons = skiplist_init(SKIP_LIST_MAX_LEVEL);
+    //                }
+    //
+    //                char* bloomVector = NULL;
+    //                receive_info(fd, &bloomVector, bloomSize);
+    //
+    //                for (int k = 0; k < bloomSize; k++) {
+    //                    virusNode->bloom->vector[k] |= bloomVector[k];
+    //                }
+    //
+    //                free(bloomVector);
+    //                free(buffer);
+    //            }
+    //
+    //        } else if (newpid == 0) { //child
+    //            argc = 3;
+    //            argv = malloc(sizeof (char*)*4);
+    //            argv[0] = "vaccineMonitor";
+    //            argv[1] = "-i";
+    //            argv[2] = node->monitorName;
+    //            argv[3] = NULL;
+    //
+    //            execvp("./vaccineMonitor", argv);
+    //        }
+    //    }
 }

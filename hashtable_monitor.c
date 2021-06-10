@@ -160,22 +160,22 @@ int create_welcoming_socket(HashtableMonitor* ht_monitors, int numMonitors, int 
 void send_countries_to_monitors(HashtableMonitor* ht_monitors, HashtableCountryNode** table, int tablelen, int numMonitors, int bufferSize) {
 
     for (int j = 0; j < tablelen; j++) {
-        char* country = table[j]->countryName;
+//        char* country = table[j]->countryName;
         table[j]->who = j % numMonitors; //round robin
 
-        char name[100];
-        sprintf(name, "%d", table[j]->who);
-
-        HashtableMonitorNode* node = hash_monitor_search(ht_monitors, name);
-
-        int fd = node->fd;
-
-        //printf("Sending country :%s to worker %d through pipe: %s via fd: %d \n", country, table[j]->who, node->from_parent_to_child, fd);
-
-        char* info1 = (char*) country;
-        int info_length1 = strlen(country) + 1;
-
-        send_info(fd, info1, info_length1, bufferSize);
+//        char name[100];
+//        sprintf(name, "%d", table[j]->who);
+//
+//        HashtableMonitorNode* node = hash_monitor_search(ht_monitors, name);
+//
+//        int fd = node->fd;
+//
+//        //printf("Sending country :%s to worker %d through pipe: %s via fd: %d \n", country, table[j]->who, node->from_parent_to_child, fd);
+//
+//        char* info1 = (char*) country;
+//        int info_length1 = strlen(country) + 1;
+//
+//        send_info(fd, info1, info_length1, bufferSize);
     }
 }
 

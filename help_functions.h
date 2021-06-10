@@ -16,7 +16,7 @@ bool find_conflict(Record record, Citizen* citizen); //finds if any value is dif
 void free_record(Record* temp); //free
 
 DIR* read_arguments_for_travel_monitor(int argc, char** argv, int* bloomSize, int *bufferSize, int *numMonitors, char ** inputDirectoryPath, int * numThreads, int * cyclicBufferSize); //reads arguments from command line
-char** read_arguments_for_vaccine_monitor(int argc, char** argv, int* bloomSize, int *bufferSize, int *numThreads, int* port, int* cyclicBufferSize);
+char*** read_arguments_for_vaccine_monitor(int argc, char** argv, int* bloomSize, int *bufferSize, int *numThreads, int* port, int* cyclicBufferSize);
 
 void send_info(int fd, char *info, int infolength, int bufferSize);
 
