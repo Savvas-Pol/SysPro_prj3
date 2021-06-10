@@ -94,9 +94,11 @@ int main(int argc, char** argv) {
     for(i=0;i<tablelen;i++) {                           //add paths to countries
         char* tempvalue = malloc(PATH_MAX);
         strcpy(tempvalue, inputDirectoryPath);
-        strcat(tempvalue, "/");
+        if(inputDirectoryPath[strlen(inputDirectoryPath)-1] != '/') {        //check if last character of given dir is "/"
+            strcat(tempvalue, "/");
+        }
         strcat(tempvalue, nodetable[i]->countryName);
-        
+
         table[i] = tempvalue;
         //printf("%d. Country: %s\n",i+1,table[i]->countryName);
     }
