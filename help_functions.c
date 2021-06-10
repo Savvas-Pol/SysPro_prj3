@@ -99,9 +99,9 @@ char*** read_arguments_for_vaccine_monitor(int argc, char** argv, int* bloomSize
             if (strcmp(argv[i], "vaccineMonitor") != 0) {
                 monitorPaths[j] = malloc(strlen(argv[i]) + 1);
                 strcpy(monitorPaths[j], argv[i]);
-                
-                strtok(argv[i], "/"); //remove path from received country
-                argv[i] = strtok(NULL, "/");
+                char * saveptr = NULL;
+                strtok_r(argv[i], "/", &saveptr); //remove path from received country
+                argv[i] = strtok_r(NULL, "/", &saveptr);
                 
                 monitorCountries[j] = malloc(strlen(argv[i]) + 1);
                 strcpy(monitorCountries[j], argv[i]);
