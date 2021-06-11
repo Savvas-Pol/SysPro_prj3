@@ -103,7 +103,6 @@ char*** read_arguments_for_vaccine_monitor(int argc, char** argv, int* bloomSize
                 char* tmp,*tmp2;
                 tmp = strtok_r(argv[i], "/", &saveptr);
                 while(tmp != NULL) {                     //remove path from received country
-                    printf("token: %s\n", tmp);
                     tmp2 = tmp;
                     tmp = strtok_r(NULL, "/", &saveptr);
                 }
