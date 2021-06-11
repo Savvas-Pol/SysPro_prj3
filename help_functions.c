@@ -98,13 +98,19 @@ char*** read_arguments_for_vaccine_monitor(int argc, char** argv, int* bloomSize
             //paths
             if (strcmp(argv[i], "vaccineMonitor") != 0) {
                 monitorPaths[j] = malloc(strlen(argv[i]) + 1);
-                strcpy(monitorPaths[j], argv[i]);
+                strcpy(monitorPaths[j], argv[i]);           //keep path
                 char * saveptr = NULL;
-                strtok_r(argv[i], "/", &saveptr); //remove path from received country
-                argv[i] = strtok_r(NULL, "/", &saveptr);
-                
-                monitorCountries[j] = malloc(strlen(argv[i]) + 1);
-                strcpy(monitorCountries[j], argv[i]);
+                char* tmp,*tmp2;
+                tmp = strtok_r(argv[i], "/", &saveptr);
+                while(tmp != NULL) {                     //remove path from received country
+                    printf("token: %s\n", tmp);
+                    tmp2 = tmp;
+                    tmp = strtok_r(NULL, "/", &saveptr);
+                }
+                // strtok_r(argv[i], "/", &saveptr);
+                // argv[i] = strtok_r(NULL, "/", &saveptr);
+                monitorCountries[j] = malloc(strlen(tmp2) + 1);
+                strcpy(monitorCountries[j], tmp2);           //keep country
                 j++;
             }
         }
