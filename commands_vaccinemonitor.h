@@ -25,5 +25,6 @@ void list_nonVaccinated_Persons(HashtableVirus* ht_viruses, char* virusName);
 int travel_request_for_child(HashtableVirus* ht_viruses, HashtableCitizen* ht_citizens,  char* citizenID, char* date, char* countryFrom,char* virusName, int readfd, int writefd, int bs);
 void add_vaccination_records_for_child(char* inputDirectoryPath, HashtableFilenames* ht_filenames, HashtableCitizen* ht_citizens, HashtableCountry* ht_countries, HashtableVirus* ht_viruses, HashtableVirusNode** table2, int tablelen2, int bloomSize, char* from_child_to_parent, int bufferSize, int readfd, int writefd);
 void search_vaccination_status_for_child(HashtableVirus* ht_viruses, HashtableCountry* ht_countries, HashtableCitizen* ht_citizens, int bloomSize, int bufferSize, int readfd, int writefd, char* citizenID);
+void add_vaccination_records_new(HashtableCountry* ht_countries, HashtableVirus* ht_viruses, int total_countries, char** countryPaths, int bloomSize, int bufferSize, int readfd, char* countryName);
 
 #endif

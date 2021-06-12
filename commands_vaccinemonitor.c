@@ -11,6 +11,8 @@
 #include "hashtable_virus.h"
 #include "hashtable_country.h"
 #include "help_functions.h"
+#include "thread_queue.h"
+#include "ThreadPool.h"
 
 void insert_citizen_record(HashtableVirus* ht_viruses, HashtableCitizen* ht_citizens, HashtableCountry* ht_countries, int bloomSize, Record record, int flag) {
 
@@ -747,4 +749,57 @@ void search_vaccination_status_for_child(HashtableVirus* ht_viruses, HashtableCo
 	int info_length = strlen(info) + 1;
 
 	send_info(writefd, info, info_length, bufferSize);
+}
+
+void add_vaccination_records_new(HashtableCountry* ht_countries, HashtableVirus* ht_viruses, int total_countries, char** countryPaths, int bloomSize, int bufferSize, int readfd, char* countryName) {
+
+	// int i, j, tablelen2;
+	// DIR* inputDirectory = NULL;
+	// struct dirent *direntp;
+
+	// for (i = 0; i < total_countries; i++) {
+ //        char* buffer = countryName;
+
+ //        if(hash_country_search(ht_countries, buffer) == NULL) {
+ //            hash_country_insert(ht_countries, buffer);
+ //        }
+ //        char* buffer4 = countryPaths[i];
+
+ //        if (!(inputDirectory = opendir(buffer4))) {
+ //            printf("Error in opening %s\n", buffer4);
+ //        } else {
+ //            while ((direntp = readdir(inputDirectory)) != NULL) {
+ //                if (direntp->d_name[0] != '.') {
+
+ //                    char* buffer5 = malloc(strlen(buffer4) + 1 + strlen(direntp->d_name) + 1);
+ //                    strcpy(buffer5, buffer4);
+ //                    strcat(buffer5, "/");
+ //                    strcat(buffer5, direntp->d_name);
+
+ //                    thread_queue_insert(tq, buffer5);
+ //                }
+ //            }
+ //        }
+ //        free(buffer4);
+ //    }
+ //    HashtableVirusNode** table = hash_virus_to_array(ht_viruses, &tablelen2);
+
+	// for (j = 0; j < tablelen2; j++) {
+	// 	char* virus = table[j]->virusName;
+	// 	char* info1 = (char*) virus;
+	// 	int info_length1 = strlen(virus) + 1;
+
+	// 	send_info(writefd, info1, info_length1, bufferSize);
+
+	// 	char* info2 = table[j]->bloom->vector;
+	// 	int info_length2 = bloomSize;
+
+	// 	send_info(writefd, info2, info_length2, bufferSize);
+	// }
+
+	// char buffer[2] = "#";
+	// char* info1 = (char*) buffer;
+	// int info_length1 = strlen(buffer) + 1;
+
+	// send_info(writefd, info1, info_length1, bufferSize);
 }

@@ -239,33 +239,7 @@ int main_vaccine(int argc, char** argv) {
 
                 tokens[0] = strtok_r(NULL, " \n", &saveptr); //countryName
 
-                //add_vaccination_records();
-                // for (i = 0; i < total_countries; i++) {
-                //     char* buffer = tokens[0];
-
-                //     if(hash_country_search(ht_countries, buffer) == NULL) {
-                //         hash_country_insert(ht_countries, buffer);
-                //     }
-                //     char* buffer4 = countryPaths[i];
-
-                //     if (!(inputDirectory = opendir(buffer4))) {
-                //         printf("Error in opening %s\n", buffer4);
-                //     } else {
-                //         while ((direntp = readdir(inputDirectory)) != NULL) {
-                //             if (direntp->d_name[0] != '.') {
-
-                //                 char* buffer5 = malloc(strlen(buffer4) + 1 + strlen(direntp->d_name) + 1);
-                //                 strcpy(buffer5, buffer4);
-                //                 strcat(buffer5, "/");
-                //                 strcat(buffer5, direntp->d_name);
-
-                //                 thread_queue_insert(tq, buffer5);
-                //             }
-                //         }
-                //     }
-
-                //     free(buffer4);
-                // }
+                add_vaccination_records_new(ht_countries, ht_viruses, total_countries, countryPaths, bloomSize, bufferSize, fd, tokens[0]);
             } else if (!strcmp(token, "/vaccineStatusBloom")) {
                 char* tokens[3];
 
