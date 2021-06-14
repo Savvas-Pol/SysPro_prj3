@@ -308,7 +308,7 @@ int receive_info(int fd, char** pstart, int bufferSize) {
 int receive_int(int fd, int buffersize) {
 
 	char* info1 = NULL;
-	int info_length1 = buffersize;
+	int32_t info_length1 = buffersize;
 
 	info_length1 = receive_info(fd, &info1, info_length1);
 

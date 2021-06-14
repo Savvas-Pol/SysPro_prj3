@@ -160,19 +160,19 @@ int main_vaccine(int argc, char** argv) {
 		//printf("Child <%d>:%d - Sending disease :%s to parent through pipe: %s via fd: %d \n", id, getpid(), virus, from_child_to_parent, writefd);
 
 		char* info1 = (char*) virus;
-		int info_length1 = strlen(virus) + 1;
+		int32_t info_length1 = strlen(virus) + 1;
 
 		send_info(fd, info1, info_length1, bufferSize);
 
 		char* info2 = table[j]->bloom->vector;
-		int info_length2 = bloomSize;
+		int32_t info_length2 = bloomSize;
 
 		send_info(fd, info2, info_length2, bufferSize);
 	}
 
 	char buffer[2] = "#"; //sending finishing character to father
 	char* info1 = (char*) buffer;
-	int info_length1 = strlen(buffer) + 1;
+	int32_t info_length1 = strlen(buffer) + 1;
 	send_info(fd, info1, info_length1, bufferSize);
 
 	//closedir(inputDirectory);
@@ -279,19 +279,19 @@ int main_vaccine(int argc, char** argv) {
 					//printf("Child <%d>:%d - Sending disease :%s to parent through pipe: %s via fd: %d \n", id, getpid(), virus, from_child_to_parent, writefd);
 
 					char* info1 = (char*) virus;
-					int info_length1 = strlen(virus) + 1;
+					int32_t info_length1 = strlen(virus) + 1;
 
 					send_info(fd, info1, info_length1, bufferSize);
 
 					char* info2 = table[j]->bloom->vector;
-					int info_length2 = bloomSize;
+					int32_t info_length2 = bloomSize;
 
 					send_info(fd, info2, info_length2, bufferSize);
 				}
 
 				char buffer[2] = "#"; //sending finishing character to father
 				char* info1 = (char*) buffer;
-				int info_length1 = strlen(buffer) + 1;
+				int32_t info_length1 = strlen(buffer) + 1;
 				send_info(fd, info1, info_length1, bufferSize);
 
 			} else if (!strcmp(token, "/vaccineStatusBloom")) {

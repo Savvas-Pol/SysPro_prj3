@@ -202,11 +202,11 @@ void vaccine_status_id(HashtableVirus* ht_viruses, HashtableCitizen* ht_citizens
 		sprintf(out2, "AGE %d", citizenNode->citizen->age);
 
 		char * info = out1;
-		int info_length = strlen(info) + 1;
+		int32_t info_length = strlen(info) + 1;
 		send_info(writefd, info, info_length, bufferSize);
 
 		char * info2 = out2;
-		int info_length2 = strlen(info2) + 1;
+		int32_t info_length2 = strlen(info2) + 1;
 		send_info(writefd, info2, info_length2, bufferSize);
 
 		for (i = 0; i < HASHTABLE_NODES; i++) {
@@ -217,7 +217,7 @@ void vaccine_status_id(HashtableVirus* ht_viruses, HashtableCitizen* ht_citizens
 					sprintf(out3, "%s YES %d-%d-%d", temp->virusName, citizen->date->day, citizen->date->month, citizen->date->year);
 
 					char* info = out3;
-					int info_length = strlen(info) + 1;
+					int32_t info_length = strlen(info) + 1;
 					send_info(writefd, info, info_length, bufferSize);
 				}
 
@@ -226,7 +226,7 @@ void vaccine_status_id(HashtableVirus* ht_viruses, HashtableCitizen* ht_citizens
 					sprintf(out4, "%s NO", temp->virusName);
 					
 					char * info = out4;
-					int info_length = strlen(info) + 1;
+					int32_t info_length = strlen(info) + 1;
 					send_info(writefd, info, info_length, bufferSize);
 				}
 				temp = temp->next;
@@ -629,35 +629,35 @@ int travel_request_for_child(HashtableVirus* ht_viruses, HashtableCitizen* ht_ci
 
 	if (q == 0) {
 		char* info = "REQUEST ACCEPTED - HAPPY TRAVELS";
-		int info_length = strlen(info) + 1;
+		int32_t info_length = strlen(info) + 1;
 
 		send_info(writefd, info, info_length, bufferSize);
 	}
 
 	if (q == 1) {
 		char* info = "REQUEST REJECTED - YOU ARE NOT VACCINATED";
-		int info_length = strlen(info) + 1;
+		int32_t info_length = strlen(info) + 1;
 
 		send_info(writefd, info, info_length, bufferSize);
 	}
 
 	if (q == 2) {
 		char* info = "REQUEST REJECTED - VIRUS NOT FOUND - YOU ARE NOT VACCINATED";
-		int info_length = strlen(info) + 1;
+		int32_t info_length = strlen(info) + 1;
 
 		send_info(writefd, info, info_length, bufferSize);
 	}
 
 	if (q == 3) {
 		char* info = "REQUEST REJECTED - YOU DO NOT EXIST - YOU ARE NOT VACCINATED";
-		int info_length = strlen(info) + 1;
+		int32_t info_length = strlen(info) + 1;
 
 		send_info(writefd, info, info_length, bufferSize);
 	}
 
 	if (q == 4) {
 		char* info = "REQUEST REJECTED - YOU WILL NEED ANOTHER VACCINATION BEFORE TRAVEL DATE";
-		int info_length = strlen(info) + 1;
+		int32_t info_length = strlen(info) + 1;
 
 		send_info(writefd, info, info_length, bufferSize);
 	}
@@ -725,19 +725,19 @@ void add_vaccination_records_for_child(char* inputDirectoryPath, HashtableFilena
 	for (j = 0; j < tablelen2; j++) {
 		char* virus = table[j]->virusName;
 		char* info1 = (char*) virus;
-		int info_length1 = strlen(virus) + 1;
+		int32_t info_length1 = strlen(virus) + 1;
 
 		send_info(writefd, info1, info_length1, bufferSize);
 
 		char* info2 = table[j]->bloom->vector;
-		int info_length2 = bloomSize;
+		int32_t info_length2 = bloomSize;
 
 		send_info(writefd, info2, info_length2, bufferSize);
 	}
 
 	char buffer[2] = "#";
 	char* info1 = (char*) buffer;
-	int info_length1 = strlen(buffer) + 1;
+	int32_t info_length1 = strlen(buffer) + 1;
 
 	send_info(writefd, info1, info_length1, bufferSize);
 }
@@ -746,7 +746,7 @@ void search_vaccination_status_for_child(HashtableVirus* ht_viruses, HashtableCo
 	vaccine_status_id(ht_viruses, ht_citizens, citizenID, bufferSize, readfd, writefd);
 
 	char* info = "#";
-	int info_length = strlen(info) + 1;
+	int32_t info_length = strlen(info) + 1;
 
 	send_info(writefd, info, info_length, bufferSize);
 }

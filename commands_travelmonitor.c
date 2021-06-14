@@ -58,7 +58,7 @@ void travel_request(HashtableVirus* ht_viruses, HashtableCountry* ht_countries, 
 	//printf("Sending command :%s to worker %d through pipe: %s via fd: %d \n", command, country->who, node->from_parent_to_child, node->fd_from_parent_to_child);
 
 	char* info = command;
-	int info_length = strlen(command) + 1;
+	int32_t info_length = strlen(command) + 1;
 
 	send_info(node->fd, info, info_length, bufferSize);
 
@@ -197,17 +197,15 @@ void add_vaccination_records(HashtableVirus* ht_viruses, HashtableCountry* ht_co
 	//printf("Sending command :%s to worker %d through pipe: %s via fd: %d \n", command, country->who, node->from_parent_to_child, node->fd_from_parent_to_child);
 
 	char* info = command;
-	int info_length = strlen(command) + 1;
+	int32_t info_length = strlen(command) + 1;
 
 	send_info(node->fd, info, info_length, bufferSize);
-	printf("Info sent!!!\n");
+	
 	int fd = node->fd;
 
 	while (1) {
-		printf("while loop!!!\n");
 		char * info3 = NULL;
 		receive_info(fd, &info3, bufferSize);
-		printf("blocked\n");
 		char* buffer = info3;
 
 		if (buffer[0] == '#') {
@@ -249,7 +247,7 @@ void search_vaccination_status(HashtableVirus* ht_viruses, HashtableCountry* ht_
 	//printf("Sending command : %s to all monitors\n", command);
 
 	char* info = command;
-	int info_length = strlen(command) + 1;
+	int32_t info_length = strlen(command) + 1;
 	for (i = 0; i < tablelen; i++) {
 		send_info(table[i]->fd, info, info_length, bufferSize);
 	}
@@ -279,7 +277,7 @@ void exit_travelmonitor(HashtableMonitor* ht_monitors, int numMonitors, int buff
 	strcpy(command, "exit");
 
 	char* info = command;
-	int info_length = strlen(command) + 1;
+	int32_t info_length = strlen(command) + 1;
 	for (i = 0; i < tablelen; i++) {
 		send_info(table[i]->fd, info, info_length, bufferSize);
 	}

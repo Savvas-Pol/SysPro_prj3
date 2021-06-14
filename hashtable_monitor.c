@@ -203,7 +203,7 @@ void send_finishing_character(HashtableMonitor* ht_monitors, int numMonitors, in
 		strcpy(buffer, "#");
 
 		char* info1 = (char*) buffer;
-		int info_length1 = strlen(buffer) + 1;
+		int32_t info_length1 = strlen(buffer) + 1;
 
 		send_info(fd, info1, info_length1, bufferSize);
 	}
