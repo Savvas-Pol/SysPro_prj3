@@ -8,15 +8,15 @@
 #include "hashtable_virus.h"
 
 typedef struct HashtableMonitorNode {
-    char* monitorName;
-    int fd;
-    pid_t pid;
-    struct HashtableMonitorNode* next; //pointer to next bucket node
+	char* monitorName;
+	int fd;
+	pid_t pid;
+	struct HashtableMonitorNode* next; //pointer to next bucket node
 } HashtableMonitorNode;
 
 typedef struct HashtableMonitor {
-    HashtableMonitorNode** nodes;
-    int hash_nodes;
+	HashtableMonitorNode** nodes;
+	int hash_nodes;
 } HashtableMonitor;
 
 HashtableMonitor* hash_monitor_create(int hashNodes);
