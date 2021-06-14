@@ -10,7 +10,7 @@ static pthread_mutex_t file_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t struct_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void* thread_main(void * argp) {
-	ThreadPoolArgp * ptargp = (ThreadPoolArgp *) argp;
+	ThreadPoolArgp* ptargp = (ThreadPoolArgp*) argp;
 	ThreadPoolArgp targp = *ptargp;
 	char* line = NULL;
 	size_t len = 0;

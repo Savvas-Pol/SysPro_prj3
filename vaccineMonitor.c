@@ -185,7 +185,7 @@ int main(int argc, char** argv) {
 			// writelog
 		}
 
-		//            add_vaccination_records_for_child(inputDirectoryPath, ht_filenames, ht_citizens, ht_countries, ht_viruses, table, tablelen, bloomSize, from_child_to_parent, bufferSize, readfd, writefd);
+		//add_vaccination_records_for_child(inputDirectoryPath, ht_filenames, ht_citizens, ht_countries, ht_viruses, table, tablelen, bloomSize, from_child_to_parent, bufferSize, readfd, writefd);
 
 		sigset_t set1;
 		sigemptyset(&set1);
@@ -234,7 +234,7 @@ int main(int argc, char** argv) {
 
 				tokens[0] = strtok_r(NULL, " \n", &saveptr); //countryName
 
-				//                add_vaccination_records_new(ht_countries, ht_viruses, total_countries, countryPaths, bloomSize, bufferSize, fd, tokens[0]);
+				//add_vaccination_records_new(ht_countries, ht_viruses, total_countries, countryPaths, bloomSize, bufferSize, fd, tokens[0]);
 
 				int files_to_be_processed = 0;
 				tq->items_processed = 0;

@@ -121,11 +121,6 @@ int main(int argc, char** argv) {
 				perror("accept");
 				exit(j);
 			}
-
-//            char* info3 = inputDirectoryPath;
-//            int info_length3 = strlen(inputDirectoryPath) + 1;
-//
-//            send_info(node->fd, info3, info_length3, info_length3);
 		} else if (pid == 0) { //child
 			argc = 11;
 			argv = malloc(sizeof (char*)*12);
@@ -160,17 +155,14 @@ int main(int argc, char** argv) {
 			}
 			argv[argc] = NULL;
 
-			// int main_vaccine(int, char **argv);
-			// main_vaccine(argc, argv);
 			execvp("./vaccineMonitor", argv);
-
 			exit(0);
 		}
 	}
 	//only parent continues from now on
 
 	send_countries_to_monitors(ht_monitors, nodetable, tablelen, numMonitors, socketBufferSize); //send countries round robin to monitors
-//    send_finishing_character(ht_monitors, numMonitors, socketBufferSize); //send finishing character "#" to all monitors
+	//send_finishing_character(ht_monitors, numMonitors, socketBufferSize); //send finishing character "#" to all monitors
 	receive_bloom_filter(ht_monitors, ht_viruses, numMonitors, bloomSize, socketBufferSize);
 
 	int vtablelen;
@@ -255,7 +247,7 @@ int main(int argc, char** argv) {
 				} else {
 					search_vaccination_status(ht_viruses, ht_countries, ht_monitors, bloomSize, socketBufferSize, numMonitors, tokens[0]);
 				}
-			} else if (!strcmp(token, "exit")) {
+			} else if (!strcmp(token, "/exit")) {
 				exit_travelmonitor(ht_monitors, numMonitors, socketBufferSize);
 				break;
 			} else {
@@ -292,9 +284,7 @@ int main(int argc, char** argv) {
 
 	for (j = 0; j < numMonitors; j++) {
 		HashtableMonitorNode* node = hash_monitor_search_with_int(ht_monitors, j);
-
 		waitpid(node->pid, 0, 0);
-
 		close(node->fd);
 	}
 
@@ -304,6 +294,7 @@ int main(int argc, char** argv) {
 
 	free(nodetable);
 	free(vtable);
+	free(table);
 
 	close(welcoming_fd);
 

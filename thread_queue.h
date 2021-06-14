@@ -27,6 +27,4 @@ ThreadQueueItem thread_queue_remove(ThreadQueue* tq);
 
 void thread_queue_increase_counter(ThreadQueue* tq);
 
-
 #endif
-

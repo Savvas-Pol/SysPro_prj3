@@ -154,7 +154,7 @@ int create_welcoming_socket(HashtableMonitor* ht_monitors, int numMonitors, int 
 		perror("getsockname");
 		exit(1);
 	} else {
-		printf("port number %d\n", ntohs(sin.sin_port));
+		//printf("port number %d\n", ntohs(sin.sin_port));
 		*port = ntohs(sin.sin_port);
 	}
 
