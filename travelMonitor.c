@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
 
 	srand(time(0));
 
-	int port = 0; // change to an arbitrary number
+	int port = 0;
 
 	/*      ---------------     */
 
@@ -157,13 +157,12 @@ int main(int argc, char** argv) {
 				strcpy(argv[argc], table[i]);
 				
 				argc++;
-				
-				//printf("path%d is %s\n",i,argv[argc]);
 			}
 			argv[argc] = NULL;
 
-			int main_vaccine(int, char **argv);
-			main_vaccine(argc, argv);
+			// int main_vaccine(int, char **argv);
+			// main_vaccine(argc, argv);
+			execvp("./vaccineMonitor", argv);
 
 			exit(0);
 		}
@@ -200,7 +199,7 @@ int main(int argc, char** argv) {
 		token = strtok(line, " \n");
 
 		if (token != NULL) {
-			if (!strcmp(token, "travelRequest")) {
+			if (!strcmp(token, "/travelRequest")) {
 				char* tokens[6];
 
 				tokens[0] = strtok(NULL, " \n"); //citizenID
@@ -216,7 +215,7 @@ int main(int argc, char** argv) {
 					travel_request(ht_viruses, ht_countries, ht_monitors, bloomSize, socketBufferSize, tokens[0], tokens[1], tokens[2], tokens[3], tokens[4], requestID, &totalAccepted, &totalRejected);
 					requestID++;
 				}
-			} else if (!strcmp(token, "travelStats")) {
+			} else if (!strcmp(token, "/travelStats")) {
 				char* tokens[5];
 
 				tokens[0] = strtok(NULL, " \n"); //virusName
@@ -234,7 +233,7 @@ int main(int argc, char** argv) {
 				} else {
 					printf("syntax error\n");
 				}
-			} else if (!strcmp(token, "addVaccinationRecords")) {
+			} else if (!strcmp(token, "/addVaccinationRecords")) {
 				char* tokens[2];
 
 				tokens[0] = strtok(NULL, " \n"); //country
@@ -245,7 +244,7 @@ int main(int argc, char** argv) {
 				} else {
 					add_vaccination_records(ht_viruses, ht_countries, ht_monitors, bloomSize, socketBufferSize, tokens[0]);
 				}
-			} else if (!strcmp(token, "searchVaccinationStatus")) {
+			} else if (!strcmp(token, "/searchVaccinationStatus")) {
 				char* tokens[2];
 
 				tokens[0] = strtok(NULL, " \n"); //citizenID

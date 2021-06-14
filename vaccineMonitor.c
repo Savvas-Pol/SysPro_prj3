@@ -32,7 +32,7 @@ void catchinterrupt2(int signo) {
 	writelog = 1;
 }
 
-int main_vaccine(int argc, char** argv) {
+int main(int argc, char** argv) {
 
 	/*  ---     DECLARATIONS    --- */
 
