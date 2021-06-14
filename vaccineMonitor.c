@@ -53,7 +53,7 @@ int main_vaccine(int argc, char** argv) {
 
     srand(time(0));
 
-    int total_countries = argc - 11;    //11 are the standard arguments
+    int total_countries = argc - 11; //11 are the standard arguments
     char*** out = read_arguments_for_vaccine_monitor(argc, argv, &bloomSize, &bufferSize, &numThreads, &port, &cyclicBufferSize);
     char** countries = out[0];
     char** countryPaths = out[1];
@@ -145,7 +145,7 @@ int main_vaccine(int argc, char** argv) {
             }
         }
 
-        free(buffer4);
+        //        free(buffer4);
     }
 
 
@@ -239,7 +239,73 @@ int main_vaccine(int argc, char** argv) {
 
                 tokens[0] = strtok_r(NULL, " \n", &saveptr); //countryName
 
-                add_vaccination_records_new(ht_countries, ht_viruses, total_countries, countryPaths, bloomSize, bufferSize, fd, tokens[0]);
+                //                add_vaccination_records_new(ht_countries, ht_viruses, total_countries, countryPaths, bloomSize, bufferSize, fd, tokens[0]);
+
+                int files_to_be_processed = 0;
+
+                tq->items_processed = 0;
+
+                for (i = 0; i < total_countries; i++) {
+                    char* buffer = countries[i];
+
+                    hash_country_insert(ht_countries, buffer);
+
+                    char* buffer4 = countryPaths[i];
+
+                    if (!(inputDirectory = opendir(buffer4))) {
+                        printf("Error in opening %s\n", buffer4);
+                    } else {
+                        while ((direntp = readdir(inputDirectory)) != NULL) {
+                            if (direntp->d_name[0] != '.') {
+
+                                char* buffer5 = malloc(strlen(buffer4) + 1 + strlen(direntp->d_name) + 1);
+                                strcpy(buffer5, buffer4);
+                                strcat(buffer5, "/");
+                                strcat(buffer5, direntp->d_name);
+
+                                thread_queue_insert(tq, buffer5);
+
+                                files_to_be_processed++;
+                            }
+                        }
+                    }
+
+                    free(buffer4);
+                }
+
+
+                pthread_mutex_lock(&tq->mtx);
+                while (tq->items_processed < files_to_be_processed) {
+                    pthread_cond_wait(&tq->cond_nonfull, &tq->mtx);
+                }
+                tq->items_processed = 0;
+                pthread_mutex_unlock(&tq->mtx);
+
+
+
+                int tablelen;
+                HashtableVirusNode** table = hash_virus_to_array(ht_viruses, &tablelen);
+                for (j = 0; j < tablelen; j++) { //sending viruses and bloom filters to father
+                    char* virus = table[j]->virusName;
+
+                    //printf("Child <%d>:%d - Sending disease :%s to parent through pipe: %s via fd: %d \n", id, getpid(), virus, from_child_to_parent, writefd);
+
+                    char* info1 = (char*) virus;
+                    int info_length1 = strlen(virus) + 1;
+
+                    send_info(fd, info1, info_length1, bufferSize);
+
+                    char* info2 = table[j]->bloom->vector;
+                    int info_length2 = bloomSize;
+
+                    send_info(fd, info2, info_length2, bufferSize);
+                }
+
+                char buffer[2] = "#"; //sending finishing character to father
+                char* info1 = (char*) buffer;
+                int info_length1 = strlen(buffer) + 1;
+                send_info(fd, info1, info_length1, bufferSize);
+
             } else if (!strcmp(token, "/vaccineStatusBloom")) {
                 char* tokens[3];
 

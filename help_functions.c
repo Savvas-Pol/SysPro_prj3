@@ -8,6 +8,7 @@
 #include <dirent.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <netinet/in.h>
 
 #include "help_functions.h"
 
@@ -226,7 +227,10 @@ int read_all(int fd, void*buff, size_t size) { //function from http://cgi.di.uoa
 }
 
 void send_info(int fd, char* info, int infolength, int bufferSize) {
-    if (write(fd, (char*) &infolength, sizeof (infolength)) == -1) {
+    
+    int32_t x = htonl(infolength);
+    
+    if (write(fd, (char*) &x, sizeof (x)) == -1) {
         if (errno == EINTR) {
             return;
         } else {
@@ -235,7 +239,7 @@ void send_info(int fd, char* info, int infolength, int bufferSize) {
         }
     }
 
-    int n = 0;
+    int32_t n = 0;
 
     while (n < infolength) {
         int m;
@@ -256,10 +260,11 @@ void send_info(int fd, char* info, int infolength, int bufferSize) {
 }
 
 int receive_info(int fd, char** pstart, int bufferSize) {
-    int infolength;
+    int32_t x;
+    int32_t infolength;
     int n = 0;
 
-    if ((n = read(fd, (char*) &infolength, sizeof (infolength))) == -1) {
+    if ((n = read(fd, (char*) &x, sizeof (x))) == -1) {
         if (errno == EINTR) {
             return 0;
         } else {
@@ -267,6 +272,8 @@ int receive_info(int fd, char** pstart, int bufferSize) {
             exit(1);
         }
     }
+    
+    infolength = ntohl(x);
 
     if (n == 0) {
         exit(1);

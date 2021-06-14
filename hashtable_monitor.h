@@ -27,7 +27,7 @@ HashtableMonitorNode* hash_monitor_search_pid(HashtableMonitor* ht, pid_t pid);
 HashtableMonitorNode* hash_monitor_insert(HashtableMonitor* ht, char* monitorName);
 void hash_monitor_delete(HashtableMonitor* ht, char* monitorName);
 
-int create_welcoming_socket(HashtableMonitor* ht_monitors, int numMonitors, int port);
+int create_welcoming_socket(HashtableMonitor* ht_monitors, int numMonitors, int *port);
 void send_countries_to_monitors(HashtableMonitor* ht_monitors, HashtableCountryNode** table, int tablelen, int numMonitors, int bufferSize);
 void send_finishing_character(HashtableMonitor* ht_monitors, int numMonitors, int bufferSize);
 void receive_bloom_filter(HashtableMonitor* ht_monitors, HashtableVirus* ht_viruses, int numMonitors, int bloomSize, int bufferSize);

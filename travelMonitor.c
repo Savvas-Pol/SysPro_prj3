@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
 
     srand(time(0));
 
-    int port = rand() % 30000 + 20000; // change to an arbitrary number
+    int port = 0; // change to an arbitrary number
 
     /*      ---------------     */
 
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
         hash_monitor_insert(ht_monitors, name); //insert monitors in parent's hashtable
     }
 
-    int welcoming_fd = create_welcoming_socket(ht_monitors, numMonitors, port);
+    int welcoming_fd = create_welcoming_socket(ht_monitors, numMonitors, &port);
     int tablelen;
     HashtableCountryNode** nodetable = hash_country_to_array(ht_countries, &tablelen); //convert hash table to array to sort countries
     char ** table = malloc(sizeof(char*)*tablelen);
