@@ -5,6 +5,8 @@
 
 #include "thread_queue.h"
 
+//from http://cgi.di.uoa.gr/~antoulas/k24/lectures/l13.pdf
+
 ThreadQueue* thread_queue_create(int thread_queue_items) {
 	ThreadQueue* tq = malloc(sizeof (ThreadQueue));
 	tq->thread_queue_items = thread_queue_items;
@@ -66,7 +68,6 @@ ThreadQueueItem thread_queue_remove(ThreadQueue* tq) {
 	pthread_cond_signal(&tq->cond_nonfull);
 	
 	pthread_mutex_unlock(&tq->mtx);
-
 
 	return item;
 }
